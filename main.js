@@ -155,6 +155,44 @@ function gameLoop() {
         requestAnimationFrame(draw);
     }
 
+// Variablen für die Berührungsposition
+let touchStartX = 0;
+let touchStartY = 0;
+
+// 1. Start der Berührung merken
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+}, false);
+
+// 2. Ende der Berührung auswerten (Wisch-Richtung)
+document.addEventListener('touchend', (e) => {
+    let touchEndX = e.changedTouches[0].screenX;
+    let touchEndY = e.changedTouches[0].screenY;
+    handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+}, false);
+
+function handleSwipe(startX, startY, endX, endY) {
+    const diffX = endX - startX;
+    const diffY = endY - startY;
+
+    // Prüfen, ob horizontaler oder vertikaler Wisch stärker war
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+        // Horizontaler Wisch
+        if (diffX > 30 && direction !== "LEFT") direction = "RIGHT";
+        else if (diffX < -30 && direction !== "RIGHT") direction = "LEFT";
+    } else {
+        // Vertikaler Wisch
+        if (diffY > 30 && direction !== "UP") direction = "DOWN";
+        else if (diffY < -30 && direction !== "DOWN") direction = "UP";
+    }
+}
+
+// Verhindert, dass das Handy beim Wischen die Seite hoch/runter scrollt
+document.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+}, { passive: false });
+
     setInterval(gameLoop, 150);
     draw();
     placeFood();
