@@ -96,6 +96,9 @@ function gameLoop() {
                 highscore = score;
                 localStorage.setItem('snakeHighscore', highscore);
                 document.getElementById('highscore-display').innerText = "Best: " + highscore;
+                alert("Neuer Rekord! " + highscore);
+            } else {
+                alert("Game Over! Dein Score: " + score);
             }
         
         score = 0;
@@ -103,10 +106,8 @@ function gameLoop() {
         if(scoreElement) {
             scoreElement.innerText = "Score: " + score;
         }
+        location.reload();
         
-        snake = [{ x: 19, y: 3 }];
-        direction = "LEFT";
-        placeFood();
         return;
     }
 
