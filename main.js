@@ -150,7 +150,7 @@ function draw() {
     ctx.fillStyle = '#080808';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.strokeStyle = '#222222';
+    ctx.strokeStyle = '#444444';
     ctx.lineWidth = 0.5;
 
     // Vertikale Linien (Spalten)
@@ -185,9 +185,23 @@ function draw() {
     if (score >= 90)  sC = '#E5E4E2'; // 90: Platin (Kurz vor der Legende)
     if (score >= 100) sC = '#FFFFFF'; // 100: White (DER LEGENDEN-MODUS)
 
+    // NEU: Der Phantom-Modus ab 110
+    let isPhantom = false;
+    if (score >= 110) {
+        sC = '#080808'; // Gleiches Schwarz wie der Hintergrund
+        isPhantom = true;
+    }
+
     ctx.fillStyle = sC;
     snake.forEach(part => {
         ctx.fillRect(part.x * cellWidth, part.y * cellHeight, cellWidth, cellHeight);
+        
+        // Wenn Phantom-Modus aktiv, zeichne nur einen dünnen weißen Umriss
+        if (isPhantom) {
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.8)"; // Zartes Weiß/Grau
+            ctx.lineWidth = 1;
+            ctx.strokeRect(part.x * cellWidth, part.y * cellHeight, cellWidth, cellHeight);
+        }
     });
 
     requestAnimationFrame(draw);
