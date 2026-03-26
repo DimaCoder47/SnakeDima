@@ -15,7 +15,7 @@
     
     <link rel="icon" href="android-chrome-192x192.png" sizes="192x192">
     <link rel="icon" href="android-chrome-512x512.png" sizes="512x512">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png?v=99">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
 <body>
 
@@ -26,6 +26,14 @@
         </div>
         <canvas id="canvas"></canvas>
     </div>
+
+<div id="highscore-overlay" style="display: none;">
+    <div class="overlay-content">
+        <h1 style="color: #FFD700;">NEUER REKORD!</h1>
+        <p id="final-score-text">Score: 0</p>
+        <button id="again-btn" onclick="resetGameAfterHighscore()">AGAIN</button>
+    </div>
+</div>
 
     <script src="main.js"></script>
 </body>
