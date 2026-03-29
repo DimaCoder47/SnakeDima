@@ -1,40 +1,65 @@
 <!DOCTYPE HTML>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <title>Severus Snape - Snake</title>
-    
+
+    <title>🐍Severus Snape🐍</title>
+
+    <link rel="stylesheet" href="style.css">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#080808">
-    
-    <link rel="stylesheet" href="style.css">
-    
     <link rel="icon" href="android-chrome-192x192.png" sizes="192x192">
-    <link rel="icon" href="android-chrome-512x512.png" sizes="512x512">
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
 </head>
+
 <body>
 
-    <div class="game-container">
-        <div id="score-wrapper">
-            <span id="highscore-display">Best: 0</span>
-            <span id="score-display">Score: 0</span>
+    <div id="ui-wrapper">
+        <div id="game-container">
+
+            <header id="score-wrapper">
+                <div class="ui-group-left">
+                    <button id="pause-btn">II</button>
+                    <span id="score-display">Score: 0</span>
+                </div>
+                <div class="ui-group-right">
+                    <span id="highscore-display">Best: 0</span>
+                </div>
+            </header>
+
+            <canvas id="canvas"></canvas>
+
+            <button id="toggle-ui-btn">● ● ●</button>
+
+            <nav id="controls">
+                <div class="row">
+                    <button class="control-btn" id="up-btn">▲</button>
+                </div>
+                <div class="row">
+                    <button class="control-btn" id="left-btn">◀</button>
+                    <button class="control-btn" id="down-btn">▼</button>
+                    <button class="control-btn" id="right-btn">▶</button>
+                </div>
+            </nav>
         </div>
-        <canvas id="canvas"></canvas>
     </div>
 
-<div id="highscore-overlay" style="display: none;">
-    <div class="overlay-content">
-        <h1 style="color: #FFD700;">NEUER REKORD!</h1>
-        <p id="final-score-text">Score: 0</p>
-        <button id="again-btn" onclick="resetGameAfterHighscore()">AGAIN</button>
-    </div>
-</div>
 
-    <script src="main.js"></script>
+    <div id="highscore-overlay" style="display: none;">
+        <div class="overlay-content">
+            <h1>NEUER REKORD!</h1>
+            <p id="final-score-text">Score: 0</p>
+            <button id="again-btn" onclick="resetGameAfterHighscore()">AGAIN</button>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="input.js"></script>
+    <script src="game.js"></script>
 </body>
+
 </html>
