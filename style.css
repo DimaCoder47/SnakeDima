@@ -1,111 +1,275 @@
-* { 
+/* --- 1. BASIS SETUP --- */
+* {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
-html {
-    background-color: black;
-}
-
-html, body {
+html,
+body {
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 0; 
+    padding: 0;
+    background-color: #000000 !important;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
     touch-action: none;
-    position: fixed;
-    overscroll-behavior: none;
+    font-family: 'Courier New', monospace;
 }
 
-.game-container {
+/* --- 2. DER CONTAINER (Das Herzstück) --- */
+#ui-wrapper {
     display: flex;
-    flex-direction: column; 
-    align-items: flex-end; 
-    width: 90vmin;  
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
 }
 
-canvas { 
+#game-container {
+    position: relative;
+    width: 98vmin;
+    height: 98vmin;
+    max-width: 800px;
+    max-height: 800px;
+}
+
+canvas {
     display: block;
-    border: mediumblue 10px solid;
-    box-shadow: 0 0 20px rgba(0, 0, 255, 0.3);
+    width: 100%;
+    height: 100%;
+    border: 6px solid mediumblue;
+    box-shadow: 0 0 20px rgba(0, 0, 255, 0.4);
     background-color: #080808;
-    width: 95vmin; 
-    height: 95vmin;
 }
 
+/* --- 3. SCORE OVERLAY (Oben im Bild) --- */
 #score-wrapper {
+    position: absolute;
+    top: -35px;
     width: 100%;
     display: flex;
     justify-content: space-between;
-    font-family: 'Courier New', monospace;
-    font-weight: bold;
-    font-size: 24px;
-    margin-bottom: 8px;
+    align-items: center;
+    padding: 0 5px;
+    top: -48px;
+}
+
+.ui-group-left {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 #score-display {
+    margin-left: 2px;
     color: #32CD32;
-    text-shadow: 0 0 8px rgba(50, 205, 50, 0.6);
+    font-weight: bold;
+    font-size: 1.4rem;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: nowrap;
 }
 
 #highscore-display {
     color: #FFD700;
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+    font-weight: bold;
+    font-size: 1.4em;
+    font-family: 'Courier New', Courier, monospace;
+    white-space: nowrap;
 }
 
-#highscore-overlay {
+/* --- 4. BUTTON OVERLAY (Unten im Bild) --- */
+#controls {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
     position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#controls.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(20px);
+}
+
+#highscore-overlay.hidden {
+    display: none !important;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.control-btn {
+    width: 70px;
+    height: 70px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(0, 0, 255, 0.5);
+    color: white;
+    font-size: 1.6rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    touch-action: manipulation;
+    transition: opacity 0.1s, transform 0.1s;
+}
+
+.control-btn:active {
+    opacity: 1;
+    background-color: rgba(0, 0, 255, 0.4);
+    transform: scale(0.9);
+}
+
+/* --- 5. GAME OVER OVERLAY --- */
+/* --- DAS NEUE OVERLAY (IM DEEP SPACE STIL) --- */
+
+#highscore-overlay {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.85); /* Dunkler Hintergrund */
+    background: rgba(8, 8, 8, 0.95);
+    /* Dunkler Canvas-Hintergrund, leicht transparent */
+    z-index: 9999;
+    /* Immer ganz oben */
     display: flex;
+    /* Zentriert den Inhalt */
     justify-content: center;
     align-items: center;
-    z-index: 100;
+    font-family: 'Courier New', Courier, monospace;
+    /* Retro-Tech Look */
+    opacity: 0;
+    /* Für das Einblenden (siehe JavaScript-Anpassung) */
+    transition: opacity 0.5s ease-in;
+    pointer-events: none;
+    /* Deaktiviert, wenn unsichtbar */
 }
 
+/* Wenn das Overlay sichtbar ist */
+#highscore-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Der Container mit dem blauen Rand */
 .overlay-content {
-    text-align: center;
-    background: #111;
-    color: #FFD700;
-    padding: 40px;
+    background: #000000;
+    border: 3px solid mediumblue;
     border-radius: 20px;
-    border: 2px solid mediumblue;
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.6);
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0, 0, 255, 0.4);
+}
+
+/* Die Goldgelbe Überschrift */
+.overlay-content h1 {
+    color: #FFD700;
+    /* Goldgelb */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 2.8rem;
+    margin-bottom: 10px;
+    letter-spacing: 4px;
+    text-shadow: 2px 2px 0px rgba(0, 0, 225, 0.8);
 }
 
 #final-score-text {
-    font-size: 1.8rem;
-    font-weight: bold;
-    margin: 15px 0;
-        animation: pulseColor 1s infinite ease-in-out;
+    color: #00FF00;
+    /* Giftgrün wie der Score oben */
+    font-family: 'Courier New', monospace;
+    font-size: 1.4rem;
+    margin-bottom: 25px;
 }
 
-@keyframes pulseColor {
-    0% {
-        color: #32CD32;
-    }
-    50% {
-        color: #EE0000;
-    }
-    100% {
-        color: #32CD32;
-    }
-}
-
-#again-btn {
-    background: #FFD700;
-    color: black;
-    border: none;
-    padding: 15px 30px;
+/* Der Ergebnistext (weiß/grau) */
+.overlay-content p {
+    color: #CCCCCC;
+    /* Hellgrau */
     font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+/* Der "AGAIN" Button */
+#again-btn {
+    background: transparent;
+    border: 2px solid #FFD700;
+    color: #FFD700;
+    padding: 12px 25px;
+    font-family: 'Courier New', monospace;
     font-weight: bold;
-    border-radius: 10px;
+    font-size: 1.3rem;
     cursor: pointer;
-    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+/* Hover-Effekt für den Button */
+#again-btn:hover {
+    background: #FFD700;
+    color: #080808;
+    box-shadow: 0 0 20px rgba(0, 0, 255, 0.6);
+}
+
+/* Toggle-Ui-BTN */
+#toggle-ui-btn {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    z-index: 30;
+    padding: 5px 15px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#toggle-ui-btn:active {
+    color: white;
+    /* Feedback beim Tippen */
+    transform: translateX(-50%) scale(1.1);
+}
+
+/* Den Pause-Button exakt wie die Pfeiltasten stylen */
+#pause-btn {
+    width: 42px;
+    height: 42px;
+
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 3px solid mediumblue;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0, 0, 255, 0.4);
+
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    touch-action: manipulation;
+    transition: transform 0.1s, background-color 0.1s;
+    pointer-events: auto;
+}
+
+#pause-btn:active {
+    background-color: mediumblue;
+    transform: scale(0.9);
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.8);
 }
