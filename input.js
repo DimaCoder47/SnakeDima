@@ -1,30 +1,36 @@
 // --- Die "Ohren" ---
 
-// Die Richtungshilfe
-function setDirection(newDir) {
+// Zentrale Funktion für ALLE Richtungsänderungen
+function handleDirectionInput(newDir) {
+    if (isPaused || isChangingDirection) return;
+
     if (newDir === "UP" && direction !== "DOWN") direction = "UP";
-    if (newDir === "DOWN" && direction !== "UP") direction = "DOWN";
-    if (newDir === "LEFT" && direction !== "RIGHT") direction = "LEFT";
-    if (newDir === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
+    else if (newDir === "DOWN" && direction !== "UP") direction = "DOWN";
+    else if (newDir === "LEFT" && direction !== "RIGHT") direction = "LEFT";
+    else if (newDir === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
+    else return;
+
+    isChangingDirection = true;
 }
 
 // Tastatur (PC)
 document.addEventListener('keydown', e => {
-    // 1. SCROLLEN VERHINDERN
-    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) {
-        e.preventDefault();
-    }
+    const key = e.key; 
+    const lowerKey = key.toLowerCase();
 
-    if (e.key === " " || e.key === "p" || e.key === "P") {
+    const gameKeys = ["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "w", "a", "s", "d"];
+    if (gameKeys.includes(lowerKey)) e.preventDefault();
+
+    if (lowerKey === " " || lowerKey === "p") {
         togglePause();
         return;
     }
-    if (isPaused) return;
 
-    if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
-    if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
-    if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
-    if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
+    // Richtungs-Eingabe (Pfeiltasten oder WASD)
+    if (key === "ArrowLeft" || lowerKey === "a") handleDirectionInput("LEFT");
+    else if (key === "ArrowUp" || lowerKey === "w") handleDirectionInput("UP");
+    else if (key === "ArrowRight" || lowerKey === "d") handleDirectionInput("RIGHT");
+    else if (key === "ArrowDown" || lowerKey === "s") handleDirectionInput("DOWN");
 });
 
 // Handy (Swipe-Steuerung)
@@ -39,21 +45,19 @@ document.addEventListener('touchstart', (e) => {
 document.addEventListener('touchend', (e) => {
     let touchEndX = e.changedTouches[0].screenX;
     let touchEndY = e.changedTouches[0].screenY;
+    let diffX = touchEndX - touchStartX;
+    let diffY = touchEndY - touchStartY;
     const threshold = 30;
 
+    // Richtung berechnen
     if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (Math.abs(diffX) > threshold) setDirection(diffX > 0 ? "RIGHT" : "LEFT");
-    } else {
-        if (Math.abs(diffY) > threshold) setDirection(diffY > 0 ? "DOWN" : "UP");
-    }
-}, { passive: true });
+            if (Math.abs(diffX) > threshold) handleDirectionInput(diffX > 0 ? "RIGHT" : "LEFT");
+        } else {
+            if (Math.abs(diffY) > threshold) handleDirectionInput(diffY > 0 ? "DOWN" : "UP");
+        }
+    }, { passive: true });
 
-// Verhindert Browser-Scrollen beim Spielen
-document.addEventListener('touchmove', (e) => {
-    e.preventDefault();
-}, { passive: false });
-
-// 5. UI-HILFSFUNKTIONEN
+// BUTTONS (TOUCH-INTERFACE)
 function toggleControls() {
     const controls = document.getElementById('controls');
     const toggleBtn = document.getElementById('toggle-ui-btn');
@@ -66,10 +70,10 @@ function toggleControls() {
 
 document.addEventListener('DOMContentLoaded', () => {
     const buttonConfigs = [
-        { id: 'up-btn', action: () => setDirection('UP') },
-        { id: 'down-btn', action: () => setDirection('DOWN') },
-        { id: 'left-btn', action: () => setDirection('LEFT') },
-        { id: 'right-btn', action: () => setDirection('RIGHT') },
+        { id: 'up-btn', action: () => handleDirectionInput('UP') },
+        { id: 'down-btn', action: () => handleDirectionInput('DOWN') },
+        { id: 'left-btn', action: () => handleDirectionInput('LEFT') },
+        { id: 'right-btn', action: () => handleDirectionInput('RIGHT') },
         { id: 'pause-btn', action: () => togglePause() },
         { id: 'toggle-ui-btn', action: () => toggleControls() }
     ];
@@ -84,19 +88,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
-
-// --- Hilfs-Funktionen (Werkzeuge) ---
-// Swipe
-
-function handleSwipe(startX, startY, endX, endY) {
-    const diffX = endX - startX;
-    const diffY = endY - startY;
-
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (diffX > 30) setDirection("RIGHT");
-        else if (diffX < -30) setDirection("LEFT");
-    } else {
-        if (diffY > 30) setDirection("DOWN");
-        else if (diffY < -30) setDirection("UP");
-    }
-}
