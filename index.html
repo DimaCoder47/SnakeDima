@@ -21,12 +21,19 @@
     <div id="ui-wrapper">
         <div id="game-container">
             <header id="score-wrapper">
-                    <button id="pause-btn">II</button>
-                    <span id="score-display">Score: 0</span>
-                    <span id="highscore-display">Best: 0</span>
+                <button id="pause-btn">II</button>
+                <span id="score-display">Score: 0</span>
+                <span id="highscore-display">Best: 0</span>
             </header>
 
-            <canvas id="canvas"></canvas>
+                <canvas id="canvas"></canvas>
+
+            <div id="mobile-controls">
+                <button id="left-btn" class="ctrl-btn">◀</button>
+                <button id="up-btn" class="ctrl-btn">▲</button>
+                <button id="down-btn" class="ctrl-btn">▼</button>
+                <button id="right-btn" class="ctrl-btn">▶</button>
+            </div>
         </div>
     </div>
 
@@ -37,6 +44,7 @@
             <button id="again-btn" onclick="resetGameAfterHighscore()">AGAIN</button>
         </div>
     </div>
+
 
     <script src="config.js"></script>
     <script src="input.js"></script>
