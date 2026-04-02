@@ -4,73 +4,84 @@
 function handleDirectionInput(newDir) {
     if (isPaused || isChangingDirection) return;
 
-    if (newDir === "UP" && direction !== "DOWN") direction = "UP";
-    else if (newDir === "DOWN" && direction !== "UP") direction = "DOWN";
-    else if (newDir === "LEFT" && direction !== "RIGHT") direction = "LEFT";
-    else if (newDir === "RIGHT" && direction !== "LEFT") direction = "RIGHT";
-    else return;
-
-    isChangingDirection = true;
+    const opposites = { 'UP': 'DOWN', 'DOWN': 'UP', 'LEFT': 'RIGHT', 'RIGHT': 'LEFT' };
+    
+    // Verhindert 180-Grad-Wenden
+    if (newDir !== opposites[direction]) {
+        direction = newDir;
+        isChangingDirection = true;
+    }
 }
 
 // Tastatur (PC)
 document.addEventListener('keydown', e => {
-    const key = e.key; 
-    const lowerKey = key.toLowerCase();
+    const key = e.key.toLowerCase();
+    
+    // Key-Mapping für schnellen Zugriff
+    const controls = {
+        'w': 'UP', 'arrowup': 'UP',
+        's': 'DOWN', 'arrowdown': 'DOWN',
+        'a': 'LEFT', 'arrowleft': 'LEFT',
+        'd': 'RIGHT', 'arrowright': 'RIGHT'
+    };
 
-    const gameKeys = ["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "w", "a", "s", "d"];
-    if (gameKeys.includes(lowerKey)) e.preventDefault();
-
-    if (lowerKey === " " || lowerKey === "p") {
+    if (key === " " || key === "p") {
+        e.preventDefault();
         togglePause();
-        return;
+    } else if (controls[key]) {
+        e.preventDefault();
+        handleDirectionInput(controls[key]);
     }
-
-    // Richtungs-Eingabe (Pfeiltasten oder WASD)
-    if (key === "ArrowLeft" || lowerKey === "a") handleDirectionInput("LEFT");
-    else if (key === "ArrowUp" || lowerKey === "w") handleDirectionInput("UP");
-    else if (key === "ArrowRight" || lowerKey === "d") handleDirectionInput("RIGHT");
-    else if (key === "ArrowDown" || lowerKey === "s") handleDirectionInput("DOWN");
 });
 
 // Handy (Swipe-Steuerung)
 let touchStartX = 0;
 let touchStartY = 0;
 
-document.addEventListener('touchstart', (e) => {
+document.addEventListener('touchstart', e => {
     touchStartX = e.changedTouches[0].screenX;
     touchStartY = e.changedTouches[0].screenY;
 }, { passive: true });
 
-document.addEventListener('touchend', (e) => {
-    let touchEndX = e.changedTouches[0].screenX;
-    let touchEndY = e.changedTouches[0].screenY;
-    let diffX = touchEndX - touchStartX;
-    let diffY = touchEndY - touchStartY;
+document.addEventListener('touchend', e => {
+    const diffX = e.changedTouches[0].screenX - touchStartX;
+    const diffY = e.changedTouches[0].screenY - touchStartY;
     const threshold = 30;
 
-    // Richtung berechnen
-    if (Math.abs(diffX) > Math.abs(diffY)) {
-            if (Math.abs(diffX) > threshold) handleDirectionInput(diffX > 0 ? "RIGHT" : "LEFT");
+    if (Math.max(Math.abs(diffX), Math.abs(diffY)) > threshold) {
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            handleDirectionInput(diffX > 0 ? "RIGHT" : "LEFT");
         } else {
-            if (Math.abs(diffY) > threshold) handleDirectionInput(diffY > 0 ? "DOWN" : "UP");
+            handleDirectionInput(diffY > 0 ? "DOWN" : "UP");
         }
-    }, { passive: true });
-
-    // Wartet, bis das Dokument geladen ist
-document.addEventListener('DOMContentLoaded', () => {
-    const pauseBtn = document.getElementById('pause-btn');
-
-    if (pauseBtn) {
-        // Für PC (Mausklick)
-        pauseBtn.addEventListener('click', (e) => {
-            togglePause();
-        });
-
-        // Für Handy (reagiert sofort ohne Verzögerung)
-        pauseBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // Verhindert doppelte Klicks und Scrollen
-            togglePause();
-        }, { passive: false });
     }
+}, { passive: true });
+
+// --- Klick-Elemente (Buttons & Pause) ---
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Pause Button
+    const pauseBtn = document.getElementById('pause-btn');
+    if (pauseBtn) {
+        const handlePause = (e) => { e.preventDefault(); togglePause(); };
+        pauseBtn.addEventListener('click', handlePause);
+        pauseBtn.addEventListener('touchstart', handlePause, { passive: false });
+    }
+
+    // 2. Richtungs-Buttons
+    const buttonMap = {
+        'up-btn': 'UP', 'down-btn': 'DOWN',
+        'left-btn': 'LEFT', 'right-btn': 'RIGHT'
+    };
+
+    Object.entries(buttonMap).forEach(([id, dir]) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            const handleBtn = (e) => {
+                e.preventDefault();
+                handleDirectionInput(dir);
+            };
+            btn.addEventListener('touchstart', handleBtn, { passive: false });
+            btn.addEventListener('click', handleBtn);
+        }
+    });
 });
