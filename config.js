@@ -1,10 +1,10 @@
 // Die Basiseinstellungen
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-canvas.height = 800;
 canvas.width = 800;
+canvas.height = 1200;
 
-const rows = 40;
+const rows = 60;
 const cols = 40;
 const cellWidth = canvas.width / cols;
 const cellHeight = canvas.height / rows;
