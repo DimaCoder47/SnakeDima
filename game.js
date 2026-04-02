@@ -273,9 +273,9 @@ function togglePause() {
         btn.textContent = isPaused ? "▶" : "II";
         btn.style.borderColor = isPaused ? "#EE0000" : "mediumblue";
     } 
+    clearTimeout(gameTimeout);
     
     if (!isPaused) {
-        clearTimeout(gameTimeout);
         gameLoop();
     }
 }
