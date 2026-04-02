@@ -4,8 +4,8 @@ function placeFood() {
     let overlapping = true;
     while (overlapping) {
         food = {
-            x: Math.floor(Math.random() * (cols - 2)) + 1,
-            y: Math.floor(Math.random() * (rows - 2)) + 1
+            x: Math.floor(Math.random() * cols),
+            y: Math.floor(Math.random() * rows)
         };
         appleSpawnTimer = 10;
         overlapping = snake.some(part => part.x === food.x && part.y === food.y);
