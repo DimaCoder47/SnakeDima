@@ -26,17 +26,24 @@ function gameLoop() {
     if (direction === "UP") head.y--;
     if (direction === "DOWN") head.y++;
 
-    // 3. KOLLISION (Wand & Körper)
-    if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows ||
-        snake.some(part => part.x === head.x && part.y === head.y)) {
-        if (score > highscore) {
-            highscore = score;
-            localStorage.setItem('snakeHighscore', highscore);
-            document.getElementById('highscore-display').innerText = "Best: " + highscore;
+// 3. KOLLISION (Wand & Körper)
+if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows ||
+    snake.some(part => part.x === head.x && part.y === head.y)) {
+
+    let savedHighscore = parseInt(localStorage.getItem('snakeHighscore')) || 0;
+
+    if (score > savedHighscore) {
+        highscore = score;
+        localStorage.setItem('snakeHighscore', score);
+        
+        const hsDisplay = document.getElementById('highscore-display');
+        if (hsDisplay) {
+            hsDisplay.innerText = "Best: " + score;
         }
-        showHighscoreOverlay(score);
-        return;
     }
+    showHighscoreOverlay(score);
+    return;
+}
 
     // 4. BEWEGUNG & ESSEN
     snake.unshift(head);
@@ -421,6 +428,12 @@ function quickReset() {
     isPaused = false;
     isChangingDirection = false;
     snake = [{ x: 7, y: 7 }];
+
+    highscore = parseInt(localStorage.getItem('snakeHighscore')) || 0;
+    const hsDisplay = document.getElementById('highscore-display');
+    if (hsDisplay) {
+        hsDisplay.innerText = "Best: " + highscore;
+    }
 
     document.getElementById('score-display').innerText = "Score: 0";
 
