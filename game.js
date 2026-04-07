@@ -1,5 +1,4 @@
 // Das "Herz & Auge"
-
 function placeFood() {
     let overlapping = true;
     while (overlapping) {
@@ -13,20 +12,20 @@ function placeFood() {
 }
 
 function gameLoop() {
-    // 1. DER TÜRSTEHER
+    // DER TÜRSTEHER
     if (isPaused) return;
 
     isChangingDirection = false;
 
     let head = { x: snake[0].x, y: snake[0].y };
 
-    // 2. BEWEGUNG
+    // BEWEGUNG
     if (direction === "LEFT") head.x--;
     if (direction === "RIGHT") head.x++;
     if (direction === "UP") head.y--;
     if (direction === "DOWN") head.y++;
 
-    // 3. KOLLISION (Wand & Körper)
+    // KOLLISION (Wand & Körper)
     if (head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows ||
         snake.some(part => part.x === head.x && part.y === head.y)) {
 
@@ -45,14 +44,14 @@ function gameLoop() {
         return;
     }
 
-    // 4. BEWEGUNG & ESSEN
+    // BEWEGUNG & ESSEN
     snake.unshift(head);
 
     if (head.x === food.x && head.y === food.y) {
         score++;
         document.getElementById('score-display').innerText = "Score: " + score;
 
-        // --- WIN-CONDITION BEI 170 PUNKTEN ---
+        // WIN-CONDITION BEI 170 PUNKTEN
         if (score >= 170) {
             showHighscoreOverlay(score);
             return;
@@ -62,7 +61,6 @@ function gameLoop() {
     } else {
         snake.pop();
     }
-
     gameTimeout = setTimeout(gameLoop, speed);
 }
 
@@ -74,16 +72,15 @@ function drawFood() {
 
     ctx.save();
 
-    // --- 1. FARB-LOGIK (Blinken & Phantom) ---
+    // FARB-LOGIK (Blinken & Phantom)
     if (appleSpawnTimer > 0) {
         ctx.fillStyle = "#FFFFFF"; // Weißes Blinken beim Erscheinen
         appleSpawnTimer--;
     } else {
-        // Wenn Score > 150, wird der Apfel leicht durchsichtig (Phantom)
         ctx.fillStyle = (score >= 150) ? `rgba(238, 0, 0, ${phantomAlpha})` : foodColor;
     }
 
-    // PIXEL-HERZFORM ZEICHNEN ---
+    // PIXEL-HERZFORM ZEICHNEN
     ctx.fillRect(x + 1, y + 1, w - 2, h / 2);
     ctx.fillRect(x + 2, y + h / 2, w - 4, h / 4);
     ctx.fillRect(x + 3, y + (3 * h / 4), w - 6, h / 4);
@@ -99,7 +96,6 @@ function drawFood() {
         const reflexSize = w * 0.15;
         ctx.fillRect(x + (w * 0.25), y + (h * 0.25), reflexSize, reflexSize);
     }
-
     ctx.restore();
 }
 
@@ -119,9 +115,8 @@ function draw() {
         isPhantom = true;
         if (score < 120) {
             phantomAlpha = 0.8;
-            showStroke = true; // Weißer Rahmen sichtbar
+            showStroke = true;
         } else {
-            // Ab 120: Rahmen weg, dafür sanftes Pulsieren
             phantomAlpha = 0.1 + (pulseValue * 0.7);
             showStroke = false;
         }
@@ -130,76 +125,42 @@ function draw() {
     // Raster ausblenden (Score 120-124)
     let gridAlpha = (score < 120) ? 1.0 : (score <= 124 ? pulseValue : 0);
 
-
-
-
-
-
-    // Start Border 150 bis 155 Border Animation
-
-
-if (score >= 150) {
-        // --- NEU: FEINERE STUFEN (Alle 2 Punkte) ---
-        let evolutionLevel = Math.floor((score - 150) / 2);
-
-        // --- DYNAMISCHE HELLIGKEIT (bis 170) ---
-        let mainAlpha = Math.min(0.02 + (evolutionLevel * 0.1), 1.0);
-        
-        // baseAlpha (der dunkle Rest) startet auch schwächer
-        let baseAlpha = Math.min(0.01 + (evolutionLevel * 0.02), 0.15);
-
-        // --- GESCHWINDIGKEIT ---
-        // Startet schnell (Speed 30) und wird alle 2 Punkte schneller.
-        let speed = Math.max(30 - (evolutionLevel * 3), 8); 
-        
-        // Winkel 1 (für den ersten Strahl)
-        let angle1 = (currentTime / speed) % 360;
-        // Winkel 2 (für den zweiten Strahl): Exakt 180 Grad versetzt
-        let angle2 = (angle1 + 180) % 360;
-
-        // --- FARBE (Sättigung steigt) ---
-        let greenValue = Math.min(80 + (evolutionLevel * 25), 255);
+    // Start Border Animation (150-170)
+    if (score >= 150) {
+        let progress = Math.min((score - 150) / 20, 1.0);
+        let angle1 = (currentTime / 20) % 360;
+        let mainAlpha = 0.05 + (0.95 * progress);
+        let baseAlpha = 0.01 + (0.19 * progress);
+        let greenValue = Math.floor(100 + (155 * progress));
+        let tailWidth = 5 + (25 * progress);
         let limeColor = `rgba(0, ${greenValue}, 0, ${mainAlpha})`;
         let darkBase = `rgba(0, 40, 0, ${baseAlpha})`;
+        let peakStart = 10;
+        let peakEnd = peakStart + (tailWidth / 2);
+        let fadeEnd = peakEnd + tailWidth;
 
-        // --- NEU: DYNAMISCHE LÄNGE (Der Schweif wächst) ---
-        // Der Schweif startet bei 5% Breite und wächst bis ca. 25% (bei Stufe 10, also Punkt 170).
-        let tailWidth = Math.min(5 + (evolutionLevel * 2), 25);
-        
-        // Wir berechnen die Stop-Punkte im Gradienten dynamisch
-        let peakStart = 15; // Der Kern des Lichts startet bei 15% des Kreises
-        let peakEnd = peakStart + (tailWidth / 2); // Der Kern wird breiter
-        let fadeEnd = peakEnd + tailWidth;        // Der Schweif endet noch weiter hinten
-
-        // --- DIE DUO-LASER BORDER-IMAGE LOGIK ---
-        // Wir definieren zwei conic-gradients. 
-        // Der erste (limeColor1) startet bei 'from ${angle1}deg'.
-        // Der zweite (limeColor2) startet bei 'from ${angle2}deg'.
-        // Der Rest des Kreises wird mit darkBase gefüllt.
-
-canvas.style.borderImageSource = `conic-gradient(from ${angle1}deg, 
-            ${darkBase} 0%, 
-            ${limeColor} ${peakStart}%, 
-            ${limeColor} ${peakEnd}%, 
-            ${darkBase} ${fadeEnd}%,
-            ${darkBase} 50%,
-            ${limeColor} ${50 + peakStart}%,
-            ${limeColor} ${50 + peakEnd}%,
-            ${darkBase} ${50 + fadeEnd}%,
-            ${darkBase} 100%)`;
+        canvas.style.borderImageSource = `conic-gradient(from ${angle1}deg, 
+        ${darkBase} 0%, 
+        ${limeColor} ${peakStart}%, 
+        ${limeColor} ${peakEnd}%, 
+        ${darkBase} ${fadeEnd}%,
+        ${darkBase} 50%,
+        ${limeColor} ${50 + peakStart}%,
+        ${limeColor} ${50 + peakEnd}%,
+        ${darkBase} ${50 + fadeEnd}%,
+        ${darkBase} 100%)`;
 
         canvas.style.borderImageSlice = "1";
         canvas.style.borderWidth = "6px";
         canvas.style.borderStyle = "solid";
         canvas.style.boxShadow = "none";
         currentGapsActive = true;
-    }    
-    
-    // ENDE Border 150 bis 155 Borde Animation
+    }
+    // ENDE Border Animation (150-170)
 
-    else if (score >= 135 && score < 149) {      
+    else if (score >= 135 && score < 149) {
         canvas.style.borderImageSource = "none";
-        canvas.style.borderColor = 'transparent'; 
+        canvas.style.borderColor = 'transparent';
         canvas.style.boxShadow = `none`;
     }
     else if (score >= 130 && score < 135) {
@@ -220,19 +181,19 @@ canvas.style.borderImageSource = `conic-gradient(from ${angle1}deg,
         bgColor = '#000000';
     } else if (score >= 140 && score < 145) {
         let baseGray = Math.max(0, 8 - (score - 140) * 1.6);
-        
+
         let pulseIntensity = Math.max(0, 1 - (score - 140) / 5);
-        let pulseEffect = (pulseValue * 4) * pulseIntensity; 
-        
+        let pulseEffect = (pulseValue * 4) * pulseIntensity;
+
         let finalGray = Math.floor(baseGray + pulseEffect);
-        
+
         bgColor = `rgb(${finalGray}, ${finalGray}, ${finalGray})`;
-    } 
+    }
     else {
         bgColor = '#080808';
     }
 
-    // ZEICHNEN DES HINTERGRUNDS
+    // Hintergrund zeichnen
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     canvas.style.backgroundColor = bgColor;
@@ -270,7 +231,7 @@ canvas.style.borderImageSource = `conic-gradient(from ${angle1}deg,
 
     snake.forEach((part, index) => {
         if ((currentGapsActive || isGlitchPhase) && index % 2 !== 0) {
-            return; // Segment überspringen
+            return;
         }
 
         const isHead = index === 0;
@@ -305,7 +266,7 @@ canvas.style.borderImageSource = `conic-gradient(from ${angle1}deg,
             ctx.stroke();
         }
 
-        //  AUGEN
+        // AUGEN
         if (isHead) {
             drawEyes(ctx, x, y, cellWidth, cellHeight, direction, score);
         }
@@ -354,7 +315,6 @@ function drawEyes(ctx, x, y, size, height, dir, score) {
     ctx.fill();
 }
 
-
 function getSnakeColor(currentScore, pulse) {
     if (currentScore >= 110) return '#080808';
     if (currentScore >= 105) {
@@ -377,7 +337,7 @@ function getSnakeColor(currentScore, pulse) {
     return '#32CD32';
 }
 
-// --- SPIEL-STEUERUNG ---
+// SPIEL-STEUERUNG
 function togglePause() {
     isPaused = !isPaused;
     const btn = document.getElementById('pause-btn');
@@ -455,7 +415,7 @@ function quickReset() {
     canvas.style.boxShadow = '0 0 20px rgba(0, 0, 255, 0.3)';
     document.body.style.backgroundColor = '#080808';
 
-    // 4. Neustart
+    // Neustart
     placeFood();
     clearTimeout(gameTimeout);
     gameLoop();
