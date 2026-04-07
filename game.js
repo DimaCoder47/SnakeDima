@@ -132,76 +132,82 @@ function draw() {
 
 
 
-    // -------------------------------
 
 
 
+    // Start Border 150 bis 155 Border Animation
 
 
-    // !!! ANIMATION BORDER !!! ///
+if (score >= 150) {
+        // --- NEU: FEINERE STUFEN (Alle 2 Punkte) ---
+        let evolutionLevel = Math.floor((score - 150) / 2);
 
-    // --- RAHMEN-LOGIK (Sanftes Gleitlicht ab 150) ---
+        // --- DYNAMISCHE HELLIGKEIT (bis 170) ---
+        let mainAlpha = Math.min(0.02 + (evolutionLevel * 0.1), 1.0);
+        
+        // baseAlpha (der dunkle Rest) startet auch schwächer
+        let baseAlpha = Math.min(0.01 + (evolutionLevel * 0.02), 0.15);
 
+        // --- GESCHWINDIGKEIT ---
+        // Startet schnell (Speed 30) und wird alle 2 Punkte schneller.
+        let speed = Math.max(30 - (evolutionLevel * 3), 8); 
+        
+        // Winkel 1 (für den ersten Strahl)
+        let angle1 = (currentTime / speed) % 360;
+        // Winkel 2 (für den zweiten Strahl): Exakt 180 Grad versetzt
+        let angle2 = (angle1 + 180) % 360;
 
-
-
-
-    if (score >= 150) {
-        // 1. STUFEN-LOGIK (0 bei 150, 1 bei 155, 2 bei 160...)
-        let evolutionLevel = Math.floor((score - 150) / 5);
-
-        // 2. DYNAMISCHE ALPHA-WERTE (Sehr geringer Start)
-        // Startet bei 0.05 (fast unsichtbar) und steigt pro Stufe um 0.15
-        let mainAlpha = Math.min(0.05 + (evolutionLevel * 0.15), 1.0);
-        let baseAlpha = Math.min(0.02 + (evolutionLevel * 0.03), 0.15);
-
-        // 3. GESCHWINDIGKEIT & FARBE
-        // Wird mit jeder Stufe etwas schneller (60 -> 50 -> 40...)
-        let speed = Math.max(60 - (evolutionLevel * 8), 20);
-        let angle = (currentTime / speed) % 360;
-
-        // Das Grün wird mit der Zeit gesättigter
-        let greenValue = Math.min(100 + (evolutionLevel * 30), 255);
+        // --- FARBE (Sättigung steigt) ---
+        let greenValue = Math.min(80 + (evolutionLevel * 25), 255);
         let limeColor = `rgba(0, ${greenValue}, 0, ${mainAlpha})`;
         let darkBase = `rgba(0, 40, 0, ${baseAlpha})`;
 
-        // 4. DER GRADIENT (Ein schmaler, wandernder Lichtstrahl)
-        canvas.style.borderImageSource = `conic-gradient(from ${angle}deg, 
-        ${darkBase} 0%, 
-        ${darkBase} 12%,
-        ${limeColor} 15%, 
-        ${limeColor} 17%, 
-        ${darkBase} 20%,
-        ${darkBase} 100%)`;
+        // --- NEU: DYNAMISCHE LÄNGE (Der Schweif wächst) ---
+        // Der Schweif startet bei 5% Breite und wächst bis ca. 25% (bei Stufe 10, also Punkt 170).
+        let tailWidth = Math.min(5 + (evolutionLevel * 2), 25);
+        
+        // Wir berechnen die Stop-Punkte im Gradienten dynamisch
+        let peakStart = 15; // Der Kern des Lichts startet bei 15% des Kreises
+        let peakEnd = peakStart + (tailWidth / 2); // Der Kern wird breiter
+        let fadeEnd = peakEnd + tailWidth;        // Der Schweif endet noch weiter hinten
+
+        // --- DIE DUO-LASER BORDER-IMAGE LOGIK ---
+        // Wir definieren zwei conic-gradients. 
+        // Der erste (limeColor1) startet bei 'from ${angle1}deg'.
+        // Der zweite (limeColor2) startet bei 'from ${angle2}deg'.
+        // Der Rest des Kreises wird mit darkBase gefüllt.
+
+canvas.style.borderImageSource = `conic-gradient(from ${angle1}deg, 
+            ${darkBase} 0%, 
+            ${limeColor} ${peakStart}%, 
+            ${limeColor} ${peakEnd}%, 
+            ${darkBase} ${fadeEnd}%,
+            ${darkBase} 50%,
+            ${limeColor} ${50 + peakStart}%,
+            ${limeColor} ${50 + peakEnd}%,
+            ${darkBase} ${50 + fadeEnd}%,
+            ${darkBase} 100%)`;
 
         canvas.style.borderImageSlice = "1";
         canvas.style.borderWidth = "6px";
         canvas.style.borderStyle = "solid";
-
-        // Schatten komplett deaktiviert für den puristischen Look
         canvas.style.boxShadow = "none";
-
-
-
-
-
-
-        // -------------------------------
-
-        // WICHTIG: Gaps für die Schlange aktivieren
         currentGapsActive = true;
-    }
-    else if (score >= 135 && score < 149) {
+    }    
+    
+    // ENDE Border 150 bis 155 Borde Animation
+
+    else if (score >= 135 && score < 149) {      
         canvas.style.borderImageSource = "none";
-        // Zwischen 135 und 149: Komplett unsichtbar
-        canvas.style.borderColor = 'transparent';
-        canvas.style.boxShadow = 'none';
+        canvas.style.borderColor = 'transparent'; 
+        canvas.style.boxShadow = `none`;
     }
     else if (score >= 130 && score < 135) {
+        let strength = Math.max(0, 1 - (score - 130) / 5);
+        let finalAlpha = pulseValue * strength;
         canvas.style.borderImageSource = "none";
-        // Warn-Blinken (Blau)
-        canvas.style.borderColor = `rgba(0, 0, 205, ${pulseValue})`;
-        canvas.style.boxShadow = `0 0 20px rgba(0, 0, 255, ${pulseValue * 0.3})`;
+        canvas.style.borderColor = `rgba(0, 0, 205, ${finalAlpha})`;
+        canvas.style.boxShadow = `0 0 20px rgba(0, 0, 255, ${finalAlpha * 0.3})`;
     }
     else if (score < 130) {
         canvas.style.borderImageSource = "none";
@@ -209,14 +215,20 @@ function draw() {
         canvas.style.boxShadow = '0 0 20px rgba(0, 0, 255, 0.3)';
     }
 
-    // INTERGRUNDFARBE LOGIK (Inkl. Pulsieren 135-139)
-    // HINTERGRUNDFARBE (Zurück auf Standard)
+    // HINTERGRUNDFARBE LOGIK (Inkl. Pulsieren 140-145)
     if (score >= 145) {
         bgColor = '#000000';
     } else if (score >= 140 && score < 145) {
-        let pulseDark = Math.floor(8 * (1 - pulseValue));
-        bgColor = `rgb(${pulseDark}, ${pulseDark}, ${pulseDark})`;
-    } else {
+        let baseGray = Math.max(0, 8 - (score - 140) * 1.6);
+        
+        let pulseIntensity = Math.max(0, 1 - (score - 140) / 5);
+        let pulseEffect = (pulseValue * 4) * pulseIntensity; 
+        
+        let finalGray = Math.floor(baseGray + pulseEffect);
+        
+        bgColor = `rgb(${finalGray}, ${finalGray}, ${finalGray})`;
+    } 
+    else {
         bgColor = '#080808';
     }
 
