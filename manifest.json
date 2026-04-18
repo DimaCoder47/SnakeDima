@@ -2,9 +2,9 @@
   "name": "Dima Retro Snake 2D",
   "short_name": "Snake Retro",
   "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#1e1e1e",
-  "theme_color": "#1e1e1e",
+  "display": "fullscreen",
+  "background_color": "#000",
+  "theme_color": "#000",
   "icons": [
     {
       "src": "android-chrome-192x192.png",
