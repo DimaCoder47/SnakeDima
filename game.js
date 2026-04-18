@@ -1,22 +1,3 @@
-import { GAME_CONFIG } from './config.js';
-
-// Funktion für den echten Vollbildmodus
-function activateNativeFullscreen() {
-    const docElm = document.documentElement;
-    if (docElm.requestFullscreen) {
-        docElm.requestFullscreen();
-    } else if (docElm.webkitRequestFullscreen) {
-        docElm.webkitRequestFullscreen();
-    }
-}
-
-// Hier greift die Konfiguration aus deiner config.js
-if (GAME_CONFIG.useFullscreen) {
-    window.addEventListener('click', () => {
-        activateNativeFullscreen();
-    }, { once: true });
-}
-
 // Das "Herz & Auge"
 function placeFood() {
     let overlapping = true;
