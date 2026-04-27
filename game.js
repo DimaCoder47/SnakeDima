@@ -285,7 +285,7 @@ function drawEyes(ctx, x, y, size, height, dir, score) {
     const eyeSize = size * 0.12;
     const offset = size * 0.25;
     let e1X, e1Y, e2X, e2Y;
-
+    
     let eyeColor = "white";
     if (score < 50 || (score >= 80 && score <= 104)) {
         eyeColor = "#080808";
@@ -296,10 +296,9 @@ function drawEyes(ctx, x, y, size, height, dir, score) {
     } else if (score >= 110) {
         eyeColor = "#FF0000";
     }
-
+    
     ctx.fillStyle = eyeColor;
 
-    // Position je nach Richtung
     if (dir === "RIGHT") {
         e1X = e2X = x + size * 0.7;
         e1Y = y + offset; e2Y = y + height - offset;
@@ -428,30 +427,17 @@ function quickReset() {
 
 // Der Play-Button
 document.getElementById('play-button').addEventListener('click', () => {
-    const docElm = document.documentElement;
-    if (docElm.requestFullscreen) {
-        docElm.requestFullscreen();
-    } else if (docElm.webkitRequestFullscreen) {
-        docElm.webkitRequestFullscreen();
-    }
+cellWidth = canvas.width / cols;
+    cellHeight = canvas.height / rows;
 
-    setTimeout(() => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        canvas.style.height = window.innerHeight + "px";
-        canvas.style.width = "100%"; 
-
-        cellWidth = canvas.width / cols;
-        cellHeight = canvas.height / rows;
-
-        const startScreen = document.getElementById('start-screen');
-        startScreen.classList.add('hidden');
-        
-        window.gameStarted = true; 
-        isPaused = false;
-        quickReset(); 
-    }, 200);
+    // 3. UI umschalten
+    const startScreen = document.getElementById('start-screen');
+    startScreen.classList.add('hidden');
+    
+    // 4. Spiel-Motor starten
+    window.gameStarted = true; 
+    isPaused = false;
+    quickReset(); 
 });
 
 // INITIALER START
@@ -515,3 +501,32 @@ function animateStartScreen() {
 
 // Den Motor starten
 animateStartScreen();
+
+// Dieser Block überwacht, ob sich das Fenster ändert (z.B. ESC drücken)
+window.addEventListener('resize', () => {
+    // Wenn das Spiel läuft, müssen wir die Maße anpassen
+    if (window.gameStarted) {
+        // 1. Interne Auflösung wieder an den Container/Fenster anpassen
+        canvas.width = canvas.parentElement.clientWidth; // Nutzt die Breite des Wrappers
+        canvas.height = canvas.parentElement.clientHeight;
+
+        // 2. CSS zurücksetzen (falls wir es im Play-Button überschrieben haben)
+        canvas.style.width = "100%";
+        canvas.style.height = "auto";
+
+        // 3. Zellen neu berechnen, damit das Raster wieder klein wird
+        cellWidth = canvas.width / cols;
+        cellHeight = canvas.height / rows;
+        
+        // Kommentar: Ohne diesen Teil würde das Spiel nach dem Vollbild "eingefroren" 
+        // in der großen Auflösung bleiben.
+    }
+});
+
+// Zusätzlicher Schutz: Erkennt wenn der Fullscreen-Modus verlassen wird
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) {
+        // Wir lösen manuell das Resize-Event aus, um alles zu fixen
+        window.dispatchEvent(new Event('resize'));
+    }
+});
